@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Job Bot Data
+jobs.csv
+cover_letters.csv
+final_applications.pdf
+linkedin_cookies.pkl
+resume.pdf
+
+# OS
+.DS_Store
+Thumbs.db

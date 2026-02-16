@@ -1,0 +1,29 @@
+# Browser Automation
+selenium
+helium
+webdriver-manager
+
+# Web Parsing
+beautifulsoup4
+lxml
+
+# Data Handling
+pandas
+
+# Resume Parsing
+pdfplumber
+python-docx
+
+# LLM / Agent Utilities
+ollama
+pydantic
+pyyaml
+
+# PDF Generation
+reportlab
+weasyprint
+jinja2
+
+# Logging & Utilities
+rich
+tqdm

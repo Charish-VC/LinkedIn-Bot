@@ -1,0 +1,19 @@
+job_search:
+  keywords:
+    - Data Analyst
+    - Junior Data Analyst
+    - Data Scientist
+    - Junior Data Scientist
+    - AI Engineer
+    - Junior AI Engineer
+    - Business Analyst
+    - Junior Business Analyst
+
+  locations:
+    - Detroit
+
+resume:
+  file: resume.pdf
+
+llm:
+  model: mistral
