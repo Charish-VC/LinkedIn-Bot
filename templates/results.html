@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Search Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta http-equiv="refresh" content="10"> <!-- Auto refresh to update status -->
+</head>
+
+<body>
+    <div class="container expanded">
+        <header class="row-header">
+            <h1>📊 Search Results</h1>
+            <div class="status-badge {{ 'completed' if status == 'Completed' else 'running' }}">
+                {{ status }}
+            </div>
+            <a href="/" class="btn-secondary">New Search</a>
+        </header>
+
+        {% if status == "Completed" and jobs|length > 0 %}
+        <div class="actions">
+            <a href="/download_pdf" class="btn-primary">📄 Download All Applications (PDF)</a>
+        </div>
+        {% endif %}
+
+        <div class="results-grid">
+            {% if jobs|length == 0 %}
+            <div class="empty-state">
+                <p>No jobs found yet. Pipeline might be running...</p>
+                <div class="loader"></div>
+            </div>
+            {% else %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Link</th>
+                            <th>Cover Letter</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in jobs %}
+                        <tr>
+                            <td>{{ job.job_title }}</td>
+                            <td>{{ job.company }}</td>
+                            <td><a href="{{ job.job_link }}" target="_blank" class="job-link">View Job</a></td>
+                            <td>
+                                {% set matching_letter = namespace(value=None) %}
+                                {% for letter in cover_letters %}
+                                {% if letter.job_link == job.job_link %}
+                                {% set matching_letter.value = letter.cover_letter %}
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if matching_letter.value %}
+                                <details>
+                                    <summary>View Letter</summary>
+                                    <div class="letter-content">
+                                        {{ matching_letter.value | replace('\n', '<br>') | safe }}
+                                    </div>
+                                </details>
+                                {% else %}
+                                <span class="text-muted">Generating...</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

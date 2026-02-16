@@ -28,6 +28,9 @@ reportlab
 weasyprint
 jinja2
 
+# Web Framework
+flask
+
 # Logging & Utilities
 rich
 tqdm
