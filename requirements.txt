@@ -18,6 +18,10 @@ python-docx
 ollama
 pydantic
 pyyaml
+langchain
+langgraph
+langchain-ollama
+langchain-community
 
 # PDF Generation
 reportlab

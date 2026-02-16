@@ -1,10 +1,10 @@
 # main.py
 
 import yaml
-from agents.job_search_agent import JobSearchAgent
-from agents.resume_agent import ResumeAgent
-from agents.cover_letter_agent import CoverLetterAgent
-from agents.pdf_agent import PDFAgent
+from graph import create_job_bot_graph
+from rich.console import Console
+
+console = Console()
 
 def load_config(config_path="config/config.yaml"):
     """Load configuration from YAML file"""
@@ -12,55 +12,55 @@ def load_config(config_path="config/config.yaml"):
         return yaml.safe_load(file)
 
 def main():
-    print("\n🚀 Starting Job Application Agent Pipeline\n")
+    console.print("\n[bold green]🚀 Starting Job Application Agent Pipeline (LangGraph Edition)[/bold green]\n")
 
     # Load configuration
-    config = load_config()
+    try:
+        config = load_config()
+    except Exception as e:
+        console.print(f"[bold red]❌ Error loading config: {e}[/bold red]")
+        return
     
     # Extract config values
     keywords = config['job_search']['keywords']
     locations = config['job_search']['locations']
     resume_file = config['resume']['file']
     llm_model = config['llm']['model']
+    max_jobs = config['job_search'].get('max_jobs_per_search', 10)
 
-    print(f"📋 Searching for: {', '.join(keywords)}")
-    print(f"📍 Locations: {', '.join(locations)}\n")
+    console.print(f"📋 Searching for: {', '.join(keywords)}")
+    console.print(f"📍 Locations: {', '.join(locations)}\n")
 
-    # 1️⃣ Job Search
-    job_agent = JobSearchAgent(
-        keywords=keywords,
-        locations=locations,
-        max_jobs_per_search=10
-    )
-    jobs_df = job_agent.run(output_csv="jobs.csv")
+    # Initialize Graph
+    bot_graph = create_job_bot_graph()
 
-    if jobs_df is None or jobs_df.empty:
-        print("❌ Job search failed or no jobs found. Stopping pipeline.")
-        return
+    # Initial State
+    initial_state = {
+        "keywords": keywords,
+        "locations": locations,
+        "resume_path": resume_file,
+        "llm_model": llm_model,
+        "max_jobs": max_jobs,
+        "jobs": [],           # Empty start
+        "resume_data": {},
+        "cover_letters": [],
+        "final_pdf": ""
+    }
 
-    # 2️⃣ Resume Parsing
-    resume_agent = ResumeAgent(model=llm_model) 
-    resume_data = resume_agent.run(resume_path=resume_file)
+    # Execute Graph
+    try:
+        # invoke returns the final state
+        final_state = bot_graph.invoke(initial_state)
+        
+        if final_state.get("error"):
+            console.print(f"[bold red]❌ Pipeline Error: {final_state['error']}[/bold red]")
+        else:
+            console.print("\n[bold green]✅ Pipeline completed successfully![/bold green]")
+            if final_state.get("final_pdf"):
+                console.print(f"📄 Applications saved to: [bold underline]{final_state['final_pdf']}[/bold underline]")
 
-    if not resume_data:
-        print("❌ Resume parsing failed. Stopping pipeline.")
-        return
-
-    # 3️⃣ Cover Letter Generation
-    cover_agent = CoverLetterAgent(model_name=llm_model)
-    cover_agent.run(
-        input_csv="jobs.csv", 
-        user_context=resume_data["structured_resume"]
-    )
-
-    # 4️⃣ PDF Generation
-    pdf_agent = PDFAgent(
-        input_file="cover_letters.csv",
-        output_file="final_applications.pdf"
-    )
-    pdf_agent.run()
-
-    print("\n✅ Pipeline completed successfully!")
+    except Exception as e:
+         console.print(f"[bold red]❌ Runtime Error: {e}[/bold red]")
 
 if __name__ == "__main__":
     main()
