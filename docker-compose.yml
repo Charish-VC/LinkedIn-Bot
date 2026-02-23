@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+
+  # ── Ollama LLM Server ─────────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: jobbot-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama   # Persist downloaded models across runs
+    # GPU support (uncomment if you have an NVIDIA GPU + nvidia-container-toolkit)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  # ── Flask Job Bot App ─────────────────────────────────────────────────────
+  jobbot:
+    build: .
+    container_name: jobbot-app
+    ports:
+      - "5000:5000"
+    environment:
+      # Tell the app where to reach Ollama (the service name resolves via Docker DNS)
+      - OLLAMA_HOST=http://ollama:11434
+      # Run Flask in production mode inside Docker
+      - FLASK_ENV=production
+    volumes:
+      # Persist user uploads and generated output outside the container
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      # Mount config so you can change keywords/locations without rebuilding
+      - ./config:/app/config
+    depends_on:
+      - ollama
+    restart: on-failure
+
+volumes:
+  ollama_data:

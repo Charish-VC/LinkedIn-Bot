@@ -12,6 +12,10 @@ from tools.pdf_generator import generate_pdf
 import pandas as pd
 import os
 
+# Ollama host — defaults to localhost but can be overridden via env var
+# (e.g. OLLAMA_HOST=http://ollama:11434 when running inside Docker Compose)
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+
 # Define State
 class AgentState(TypedDict):
     keywords: List[str]
@@ -86,7 +90,7 @@ def parse_resume_node(state: AgentState):
         raw_text = parsed_data["raw_text"]
         
         # 2. Structure with LLM
-        llm = ChatOllama(model=model_name, temperature=0)
+        llm = ChatOllama(model=model_name, temperature=0, base_url=OLLAMA_HOST)
         
         system_msg = """You are an expert resume analyzer.
 Given the resume text, extract structured information in JSON format with the following keys:
@@ -139,7 +143,7 @@ def generate_cover_letters_node(state: AgentState):
         
     structured_resume = resume_data.get("structured_resume", "")
     
-    llm = ChatOllama(model=model_name, temperature=0.7)
+    llm = ChatOllama(model=model_name, temperature=0.7, base_url=OLLAMA_HOST)
     
     cover_letters = []
     
