@@ -17,3 +17,12 @@ resume:
 
 llm:
   model: mistral
+
+selenium:
+  chrome_profile_path: C:\Users\chari\AppData\Local\Google\Chrome\User Data\SeleniumProfile
+
+scraping:
+  min_delay_seconds: 2.0
+  max_delay_seconds: 4.0
+  page_load_wait_seconds: 3
+  anti_detection: true
